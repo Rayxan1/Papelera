@@ -1,0 +1,66 @@
+Codigo y Explicacion :
+Este código utiliza un sensor de ultrasonidos (HC-SR04) y un servo motor para crear un
+sistema que mide la distancia a un objeto y mueve un servo motor en respuesta a esa
+distancia. Aquí hay una explicación detallada del código:
+Librería y Declaraciones Iniciales
+#include <Servo.h>
+Servo myservo; // Objeto servo
+int trigPin = 2; // Pin del HC-SR04 conectado al pin Trig
+int echoPin = 3; // Pin del HC-SR04 conectado al pin Echo
+long duration;
+ Se incluye la librería “Servo”para manejar el servo motor.
+ Se declara un objeto “myservo” para controlar el servo motor.
+ “trigPin” y “echoPin” son los pines utilizados para conectar el sensor
+ultrasónico HC-SR04.
+ “duration” se utiliza para almacenar la duración del pulso ultrasónico.
+Variables para Control del Servo
+int distance;
+int servoState = 0; // Variable para controlar el estado del servo (0 para 0 grados, 1 para
+90 grados)
+unsigned long servoMoveTime = 0;
+const unsigned long servoMoveDelay = 3000; // Tiempo de espera en milisegundos
+const int servoPosition0 = 10; // Ángulo en grados para la posición 0
+const int servoPosition90 = 90; // Ángulo en grados para la posición 90
+ “distance” almacena la distancia medida por el sensor ultrasónico.
+ “servoState” indica si el servo está en posición 0 grados (0) o 90 grados (1).
+ “servoMoveTime” guarda el tiempo del último movimiento del servo.
+ “servoMoveDelay” es el tiempo de espera después de un movimiento del
+servo, en milisegundos.
+ “servoPosition0” y “servoPosition90” son los ángulos en grados para las
+posiciones del servo.
+Configuración Inicial
+void setup() {
+ myservo.attach(9); // Conectar el servo al pin 9
+ myservo.write(servoPosition0); // Inicializar el servo en la posición 0 grados
+ pinMode(trigPin, OUTPUT);
+ pinMode(echoPin, INPUT);
+ Serial.begin(9600);
+}
+ Se conecta el servo al pin 9.
+ Se posiciona el servo en 0 grados al inicio.
+ Se configuran los pines del sensor ultrasónico.
+Bucle Principal
+void loop() {
+ unsigned long currentTime = millis();
+ digitalWrite(trigPin, HIGH);
+ delayMicroseconds(10);
+ digitalWrite(trigPin, LOW);
+ duration = pulseIn(echoPin, HIGH);
+ distance = (duration / 2) / 29.1;
+ Serial.print("Distancia: ");
+ Serial.print(distance);
+ Serial.println(" cm");
+ if (distance < 15) {
+ if (servoState == 1) {
+ myservo.write(servoPosition0); // Mover el servo a 0 grados
+ servoState = 0;
+ servoMoveTime = currentTime;
+ }
+ } else {
+ if (servoState == 0 && currentTime - servoMoveTime >= servoMoveDelay) {
+ myservo.write(servoPosition90); // Mover el servo a 90 grados
+ servoState = 1;
+ servoMoveTime = currentTime;
+ }
+ }
+ del
